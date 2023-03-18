@@ -6,7 +6,7 @@
 	$datePurge		= 10;	// Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
 	$arraySeances		= array ("Dimanche" => "", "Lundi" => "1830", "Mardi" => "", "Mercredi" => "1830,1930", "Jeudi"=> "", "Vendredi" => "1830", "Samedi" =>"");// On liste les séances qu'on veut, on met les horaires au format HHmm, séparés par une "," , pour pouvoir les manipuler comme des nombres par la suite
 	$arrayAnimateur	= array ("Dimanche" => "", "Lundi" => "", "Mardi" => "", "Mercredi" => "JP", "Jeudi"=> "", "Vendredi" => "Fred", "Samedi" =>"");// On liste les animateurs des séances
-	$baseURL			= "https://dev.codeix.fr/as1881-avifit";
+	$baseURL		= "https://dev.codeix.fr/as1881-avifit";
 	$arrayAdmin		= array ("Nom Exemple" => "Mail Exemple"); // Liste des admins et des mails associés avec comme format : "Nom" => "Email", séparé d'une virgule
 	
 	//----------------------  Fonctions	& Pré-requis
@@ -171,8 +171,7 @@
 			
 			// Si on est sur un act REMOVE, alors on supprime le truc
 			if($_GET["act"] == "adminRemove" && $_GET["targetName"] != "" && $_GET["targetEmail"] != "" && $_GET["date"] != "" && $isAdmin == true)  {	
-				foreach($xml->xpath('//insc[ @email="'. $GP_email .'" and @name="'.$_GET["targetName"].'" and @date="'.$_GET["date"].'"]') as $el) {
-					$domRef = dom_import_simplexml($el); 
+				foreach($xml->xpath('//insc[ @email="'. $_GET["targetEmail"] .'" and @name="'.$_GET["targetName"].'" and @date="'.$_GET["date"].'"]') as $el) {					$domRef = dom_import_simplexml($el); 
 					$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
 					$dom = new DOMDocument('1.0'); $dom->preserveWhiteSpace = false; $dom->formatOutput = true; // Préservation de la présentation
 					$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
