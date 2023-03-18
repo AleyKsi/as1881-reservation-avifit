@@ -6,8 +6,8 @@
 	$datePurge		= 10;	// Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
 	$arraySeances		= array ("Dimanche" => "", "Lundi" => "1830", "Mardi" => "", "Mercredi" => "1830,1930", "Jeudi"=> "", "Vendredi" => "1830", "Samedi" =>"");// On liste les séances qu'on veut, on met les horaires au format HHmm, séparés par une "," , pour pouvoir les manipuler comme des nombres par la suite
 	$arrayAnimateur	= array ("Dimanche" => "", "Lundi" => "", "Mardi" => "", "Mercredi" => "JP", "Jeudi"=> "", "Vendredi" => "Fred", "Samedi" =>"");// On liste les animateurs des séances
-	$baseURL		= "https://dev.codeix.fr/as1881-avifit";
-	$arrayAdmin		= array ("Nom Exemple" => "Mail Exemple"); // Liste des admins et des mails associés avec comme format : "Nom" => "Email", séparé d'une virgule
+	$baseURL			= "https://dev.codeix.fr/as1881-avifit";
+	$arrayAdmin		= array ("Alexis" => "alexis.jenny@gmail.com"); // Liste des admins et des mails associés avec comme format : "Nom" => "Email", séparé d'une virgule
 	
 	//----------------------  Fonctions	& Pré-requis
 	function getBetweenDates($startDate, $endDate)
@@ -171,7 +171,8 @@
 			
 			// Si on est sur un act REMOVE, alors on supprime le truc
 			if($_GET["act"] == "adminRemove" && $_GET["targetName"] != "" && $_GET["targetEmail"] != "" && $_GET["date"] != "" && $isAdmin == true)  {	
-				foreach($xml->xpath('//insc[ @email="'. $_GET["targetEmail"] .'" and @name="'.$_GET["targetName"].'" and @date="'.$_GET["date"].'"]') as $el) {					$domRef = dom_import_simplexml($el); 
+				foreach($xml->xpath('//insc[ @email="'. $_GET["targetEmail"] .'" and @name="'.$_GET["targetName"].'" and @date="'.$_GET["date"].'"]') as $el) {
+					$domRef = dom_import_simplexml($el); 
 					$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
 					$dom = new DOMDocument('1.0'); $dom->preserveWhiteSpace = false; $dom->formatOutput = true; // Préservation de la présentation
 					$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
@@ -435,6 +436,22 @@
 		$kCount = $kId - 1 ;// On calcule le nombre de séances
 		
 		
+		// Affichag du login
+		
+		if($unlockInsc  == false) $loginDisplay =  '
+			<input name="name" placeholder="Nom" value="'.$GP_name.'" />
+			<input name="email" type="email" placeholder="E-mail" value="'.$GP_email.'"/>
+			<input type="submit" value="S\'authentifier"/>
+			';
+		else {
+			$loginDisplay =  '
+			Bienvenue <b>'.$GP_name.'</b> ('.$GP_email.') ! <br/> <br/>
+			Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="'.$myURL.'">'.$myURL.'</a><br/><br/>
+			<a href="https://dev.codeix.fr/as1881-avifit/">Se déconnecter</a>								
+			';			
+									
+			if($isAdmin == true) $loginDisplay .=  '<br/><br/><b>Vous êtes administrateur ! Vous pouvez supprimer des personnes dans les listes</b> !';
+			}
 		
 		
 	?>
@@ -593,36 +610,18 @@
 				
 				<hr class="fancy-line"/>
 							
-				<div class="inscription">	
-					
-					
+				<div class="inscription">
 					<div class="form <?php echo $unlockStyle;?> " id="anchor-form">
 						<form action="/as1881-avifit/#anchor-form" method="post">
-							<?php
-								if($unlockInsc  == false) echo '
-									<input name="name" placeholder="Nom" value="'.$GP_name.'" />
-									<input name="email" type="email" placeholder="E-mail" value="'.$GP_email.'"/>
-									<input type="submit" value="S\'authentifier"/>
-									';
-								else {
-									echo '
-									Bienvenue <b>'.$GP_name.'</b> ('.$GP_email.') ! <br/> <br/>
-									Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="'.$myURL.'">'.$myURL.'</a><br/><br/>
-									<a href="https://dev.codeix.fr/as1881-avifit/">Se déconnecter</a>								
-									';
-									
-									
-									if($isAdmin == true) echo '<br/><br/><b>Vous êtes administrateur ! Vous pouvez supprimer des personnes dans les listes</b> !';
-									}
-							?>	
+							<?php echo $loginDisplay;?>	
 						</form>					
 					
-					
-					<?php echo '
-					<div class="control-panel">Filtres : '.$kCount.' séances sont ouvertes aux inscriptions jusque <b> fin '.$dateLimitMonthHuman.'</b>. <br/><br/>
-						'.$listFilters.' 						
-					</div>';
-					?>
+					<div class="control-panel">
+						Filtres :
+						<?php echo $kCount.' séances sont ouvertes aux inscriptions jusque <b> fin '.$dateLimitMonthHuman.'</b>.';?>
+						<br/><br/>
+						<?php echo $listFilters;?>
+					</div>
 					
 					</div>
 					<!----
@@ -636,9 +635,7 @@
 				</div>			
 				
 				<div class="inscription-passe">
-					<?php				
-						echo $dateDisplay;
-						?>
+					<?php echo $dateDisplay; ?>
 				</div>
 				
 			</div>
